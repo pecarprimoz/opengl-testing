@@ -12,9 +12,9 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 
-bool prepare_shader_source(const char* fname, const char* source);
+bool prepare_shader_source(const char* fname, const char** source);
 
-bool prepare_shader_source(const char* fname, const char* source) {
+bool prepare_shader_source(const char* fname, const char** source) {
     // read the vertex shader source
     std::ifstream read_stream;
     read_stream.open(fname);
@@ -22,10 +22,12 @@ bool prepare_shader_source(const char* fname, const char* source) {
         fprintf(stderr, "Cannot open stream to read, filename %s.", fname);
         return false;
     }
+    const char* current_shader_source = "";
     char current_char;
     while (read_stream >> current_char) {
-        source += current_char;
+        current_shader_source += current_char;
     }
+    *source = current_shader_source;
     read_stream.close();
     return true;
 }
@@ -61,12 +63,12 @@ int main() {
     }
 
     // read the shader into a string for later usage
-    if (!prepare_shader_source(vertex_shader_source_name, vertex_shader_source)) {
+    if (!prepare_shader_source(vertex_shader_source_name, &vertex_shader_source)) {
         std::cout << "Failed to prepare vertex shader." << std::endl;
         return -1;
     }
 
-    if (!prepare_shader_source(fragment_shader_source_name, fragment_shader_source)) {
+    if (!prepare_shader_source(fragment_shader_source_name, &fragment_shader_source)) {
         std::cout << "Failed to prepare fragment shader." << std::endl;
         return -1;
     }
@@ -88,12 +90,12 @@ int main() {
 
     // copy the data to the buffers memory
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    // ! END OF VERTEX INPUT
 
     // ! VERTEX SHADER
     unsigned int vertex_shader;
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
+    glCompileShader(vertex_shader);
 
     // check if the shader loading failed
     int  success;
@@ -102,6 +104,38 @@ int main() {
     if (!success) {
         glGetShaderInfoLog(vertex_shader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    // ! FRAGMENT SHADER
+    unsigned int fragment_shader;
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
+    glCompileShader(fragment_shader);
+
+    success;
+    infoLog[512];
+    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragment_shader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    // ! SHADER PROGRAM
+    unsigned int shader_program;
+    // create a shader program
+    shader_program = glCreateProgram();
+    // link the vertex and fragment shader
+    glAttachShader(shader_program, vertex_shader);
+    glAttachShader(shader_program, fragment_shader);
+    // link the program
+    glLinkProgram(shader_program);
+    
+    success;
+    infoLog[512];
+    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shader_program, 512, NULL, infoLog);
+        std::cout << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
     // render loop
