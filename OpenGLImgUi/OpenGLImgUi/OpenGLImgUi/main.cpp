@@ -12,9 +12,9 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 
-bool prepare_shader_source(const char* fname, const char** source);
+bool prepare_shader_source(const char* fname, const char* &source);
 
-bool prepare_shader_source(const char* fname, const char** source) {
+bool prepare_shader_source(const char* fname, const char* &source) {
     // read the vertex shader source
     std::ifstream read_stream;
     read_stream.open(fname);
@@ -22,23 +22,23 @@ bool prepare_shader_source(const char* fname, const char** source) {
         fprintf(stderr, "Cannot open stream to read, filename %s.", fname);
         return false;
     }
-    const char* current_shader_source = "";
+    char current_shader_source[512];
     char current_char;
+    int i = 0;
     while (read_stream >> current_char) {
-        current_shader_source += current_char;
+        current_shader_source[i] = current_char;
     }
-    *source = current_shader_source;
+    strcpy(*source,current_shader_source);
     read_stream.close();
     return true;
 }
 
 int main() {
 
-
     const char* vertex_shader_source_name = "shader.vert";
     const char* fragment_shader_source_name = "shader.frag";
-    const char* vertex_shader_source = "";
-    const char* fragment_shader_source = "";
+    char* vertex_shader_source;
+    char* fragment_shader_source;
 
     // glfw: initialize and configure
     glfwInit();
