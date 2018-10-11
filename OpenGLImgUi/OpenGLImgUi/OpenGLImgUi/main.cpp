@@ -19,7 +19,7 @@ bool prepare_shader_source(const char* fname, const char* source) {
     std::ifstream read_stream;
     read_stream.open(fname);
     if (!read_stream) {
-        std::cerr << "Cannot open stream to read vertex shader." << std::endl;
+        fprintf(stderr, "Cannot open stream to read, filename %s.", fname);
         return false;
     }
     char current_char;
@@ -91,7 +91,6 @@ int main() {
     // ! END OF VERTEX INPUT
 
     // ! VERTEX SHADER
-
     unsigned int vertex_shader;
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
