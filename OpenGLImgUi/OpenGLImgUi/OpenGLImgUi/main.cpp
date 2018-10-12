@@ -186,45 +186,36 @@ int main() {
     };
 
     // need to create a vertex attribute objects, that holds the info for vertices in the vertex buffer object
-    unsigned int vertex_attribute_object_t1;
-    glGenVertexArrays(1, &vertex_attribute_object_t1);
-    glBindVertexArray(vertex_attribute_object_t1);
+    unsigned int vertex_attribute_objects[2];
+    unsigned int vertex_buffer_objects[2];
+    glGenBuffers(2, vertex_buffer_objects);
+    glGenVertexArrays(2, vertex_attribute_objects);
     
-    // DONT DEFINE NEW ATTRIBUTE OBJECTS TRIED A NEW ONE AND FIRST TRIANGLE WOULD NOT RENDER !
-  
-    // define the element buffer, enables us to pass indices instead of vertex chunks
-    unsigned int element_buffer_object_t1;
-    glGenBuffers(1, &element_buffer_object_t1);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object_t1);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_t1), indices_t1, GL_STATIC_DRAW);
-
-    //// define the element buffer, enables us to pass indices instead of vertex chunks
-    unsigned int element_buffer_object_t2;
-    glGenBuffers(1, &element_buffer_object_t2);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object_t2);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_t2), indices_t2, GL_STATIC_DRAW);
-
-    // define the objects thats gonna hold vertices on the gpu
-    unsigned int vertex_buffer_object_t1;
-    glGenBuffers(1, &vertex_buffer_object_t1);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_t1);
+    // t1
+    glBindVertexArray(vertex_attribute_objects[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_objects[0]);
+    // could splitvertices since its shitty we pass data twice
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    unsigned int vertex_buffer_object_t2;
-    glGenBuffers(1, &vertex_buffer_object_t2);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_t2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-
-    // tell opengl how to use the data
+    // how to use the data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // which attrib array to use
-
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    // t2
+    glBindVertexArray(vertex_attribute_objects[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_objects[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // define the element buffer, enables us to pass indices instead of vertex chunks
+    unsigned int element_buffer_objects[2];
+    glGenBuffers(2, element_buffer_objects);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_objects[0]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_t1), indices_t1, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_objects[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_t2), indices_t2, GL_STATIC_DRAW);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -238,22 +229,23 @@ int main() {
         // use our program
         glUseProgram(shader_program_t1);
         // bind the attribute object first
-        glBindVertexArray(vertex_attribute_object_t1);
+        glBindVertexArray(vertex_attribute_objects[0]);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object_t1);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_objects[0]);
         glDrawElements(GL_TRIANGLES, 1 * 3, GL_UNSIGNED_INT, 0);
         
         // use our program
         glUseProgram(shader_program_t2);
         // bind the attribute object first
-        glBindVertexArray(vertex_attribute_object_t1);
+        glBindVertexArray(vertex_attribute_objects[1]);
         
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object_t2);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_objects[1]);
         glDrawElements(GL_TRIANGLES, 1 * 3, GL_UNSIGNED_INT, 0);
-
-
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-
+        /*
+          // Alternative
+            glBindVertexArray(vertex_attribute_objects[0]);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        */
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
