@@ -26,7 +26,10 @@
     <None Include="shader.vert">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="shader.frag">
+    <None Include="shader_t1.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_t2.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
